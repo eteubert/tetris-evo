@@ -4,12 +4,14 @@ POPULATION_SIZE = 5
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 10
 RATING_SUBFUNCTIONS = 12
+DEBUG = true
 
 class Individual
   attr_reader :weights, :exponents
   
   @weights    = []
   @exponents  = []
+  @fitness    = nil
   
   def initialize(values)
     @weights    = values[:weights]
@@ -17,9 +19,15 @@ class Individual
   end
 
   def fitness
+    
+    # cache fitness
+    return @fitness unless @fitness.nil?
+    
+    # or recalculate it
     @tetris = Tetris::Game.new(
       Tetris::Dimensions.new(:width => BOARD_WIDTH, :height => BOARD_HEIGHT)
     )
+    current_fitness = 0
     best_board = @tetris.board
     while not best_board.lost?
       possibilities = best_board.generate_possibilities_for_both_tetrominos
@@ -38,13 +46,16 @@ class Individual
         end
       end
       break if best_board.nil?
-      fitness = best_board.lines_cleared
+      break if DEBUG && current_fitness > 5
+      current_fitness = best_board.lines_cleared
       # puts "======"
       # best_board.display
       # puts best_board.lines_cleared
     end
     
-    return fitness
+    @fitness = current_fitness
+    
+    return @fitness
   end
 
   def self.create_random(size = 12)
@@ -80,10 +91,11 @@ class Main
   
   def run
     generate_initial_population
-    @population.each do |individual|
-      fitness = individual.fitness
-      puts "Fitness of #{individual}: #{fitness}"
-    end
+    
+    # sort population by fitness
+    @population.sort_by!(&:fitness).reverse!
+    # print current populations fitness
+    p @population.map(&:fitness)
   end
   
   private
