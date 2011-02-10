@@ -1,5 +1,10 @@
 require 'tetris-api'
 
+POPULATION_SIZE = 5
+BOARD_WIDTH = 6
+BOARD_HEIGHT = 10
+RATING_SUBFUNCTIONS = 12
+
 class Individual
   attr_reader :weights, :exponents
   
@@ -9,6 +14,37 @@ class Individual
   def initialize(values)
     @weights    = values[:weights]
     @exponents  = values[:exponents]
+  end
+
+  def fitness
+    @tetris = Tetris::Game.new(
+      Tetris::Dimensions.new(:width => BOARD_WIDTH, :height => BOARD_HEIGHT)
+    )
+    best_board = @tetris.board
+    while not best_board.lost?
+      possibilities = best_board.generate_possibilities_for_both_tetrominos
+      # choose board with highest rating
+      highest_rating = nil
+      best_board = nil
+      possibilities.each do |board|
+        rating = Tetris::BoardRating.new(board)
+        rating_sum = 0
+        RATING_SUBFUNCTIONS.times do |i|
+          rating_sum += @weights[i] * rating.send(Tetris::BoardRating::RATING_NAMES[i]) ** @exponents[i]
+        end
+        if highest_rating == nil || rating_sum > highest_rating
+          highest_rating = rating_sum
+          best_board = deep_copy(board.parent)
+        end
+      end
+      break if best_board.nil?
+      fitness = best_board.lines_cleared
+      # puts "======"
+      # best_board.display
+      # puts best_board.lines_cleared
+    end
+    
+    return fitness
   end
 
   def self.create_random(size = 12)
@@ -35,11 +71,6 @@ class Individual
   
 end
 
-POPULATION_SIZE = 1
-BOARD_WIDTH = 6
-BOARD_HEIGHT = 10
-RATING_SUBFUNCTIONS = 12
-
 class Main
   
   def initialize(values = {})
@@ -50,31 +81,8 @@ class Main
   def run
     generate_initial_population
     @population.each do |individual|
-      @tetris = Tetris::Game.new(
-        Tetris::Dimensions.new(:width => BOARD_WIDTH, :height => BOARD_HEIGHT)
-      )
-      best_board = @tetris.board
-      while not best_board.lost?
-        possibilities = best_board.generate_possibilities_for_both_tetrominos
-        # choose board with highest rating
-        highest_rating = nil
-        best_board = nil
-        possibilities.each do |board|
-          rating = Tetris::BoardRating.new(board)
-          rating_sum = 0
-          RATING_SUBFUNCTIONS.times do |i|
-            rating_sum += individual.weights[i] * rating.send(Tetris::BoardRating::RATING_NAMES[i]) ** individual.exponents[i]
-          end
-          if highest_rating == nil || rating_sum > highest_rating
-            highest_rating = rating_sum
-            best_board = deep_copy(board.parent)
-          end
-        end
-        break if best_board.nil?
-        puts "======"
-        best_board.display
-        puts best_board.lines_cleared
-      end
+      fitness = individual.fitness
+      puts "Fitness of #{individual}: #{fitness}"
     end
   end
   
