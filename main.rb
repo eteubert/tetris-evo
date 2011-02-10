@@ -1,10 +1,29 @@
 require 'tetris-api'
 
-POPULATION_SIZE = 5
+RATING_SUBFUNCTIONS = 12
+DEBUG = false
+
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 10
-RATING_SUBFUNCTIONS = 12
-DEBUG = true
+
+POPULATION_SIZE = 5
+CHILDREN_SIZE = 5
+
+class Array
+  
+  def sum
+    self.compact.inject(0) {|sum, i| sum += i}
+  end
+  
+  def rand_index
+    rand(self.length)
+  end
+  
+  def sample
+    self[rand_index]
+  end
+  
+end
 
 class Individual
   attr_reader :weights, :exponents
@@ -17,11 +36,44 @@ class Individual
     @weights    = values[:weights]
     @exponents  = values[:exponents]
   end
-
+  
+  def ihash
+    (@weights.sum * @exponents.sum).to_s[0,64]
+  end
+  
+  # mutate 1 weight and 1 exponent at once
+  # weights:
+  #   - *= 2 to 10  70%
+  #   - /= 2 to 10  25%
+  #   - *= -1        5%
+  # exponent:
+  #   - +- 0 to 0.5 
+  def mutate
+    weight_index = rand(RATING_SUBFUNCTIONS)
+    random_value_for_weight = (rand * 100).round
+    
+    @weights[weight_index] = case random_value_for_weight
+    when 0..5     then @weights[weight_index] *= -1
+    when 6..30    then @weights[weight_index] /= rand(9)+2
+    when 31..100  then @weights[weight_index] *= rand(9)+2
+    end
+    @weights[weight_index] = @weights[weight_index].round
+    
+    exponent_index = rand(RATING_SUBFUNCTIONS)
+    @exponents[exponent_index] += rand - 0.5
+    
+    # uncache fitness
+    @fitness = nil
+    
+    self
+  end
+    
   def fitness
     
     # cache fitness
     return @fitness unless @fitness.nil?
+    
+    # puts "Calc fitness for #{self.ihash}"
     
     # or recalculate it
     @tetris = Tetris::Game.new(
@@ -87,15 +139,33 @@ class Main
   def initialize(values = {})
     @population_size = values[:population_size] || POPULATION_SIZE
     @population = []
+    @iteration = 1
   end
   
   def run
-    generate_initial_population
+    puts "== Random Individuals =="
     
+    generate_initial_population
     # sort population by fitness
     @population.sort_by!(&:fitness).reverse!
     # print current populations fitness
     p @population.map(&:fitness)
+    
+    10.times do
+      puts "== Iteration #{@iteration} =="
+      # calculate children via mutation & recombination
+      children = []
+      CHILDREN_SIZE.times do
+        children << deep_copy(@population.sample).mutate
+      end
+
+      # take best <POPULATION_SIZE> of parents and children
+      old_and_new = (@population + children).sort_by!(&:fitness).reverse!
+      @population = old_and_new.take(POPULATION_SIZE)
+      p @population.map(&:fitness)
+
+      @iteration += 1
+    end
   end
   
   private
