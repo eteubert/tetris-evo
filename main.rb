@@ -6,8 +6,8 @@ DEBUG = false
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 10
 
-POPULATION_SIZE = 10
-CHILDREN_SIZE = 5
+POPULATION_SIZE = 8
+CHILDREN_SIZE = 16
 
 RECOMBINATION_CHANCE = 0.2
 
@@ -47,8 +47,8 @@ class Individual
   
   # mutate 1 weight and 1 exponent at once
   # weights:
-  #   - *= 2 to 10  70%
-  #   - /= 2 to 10  25%
+  #   - *= 2 to 100  70%
+  #   - /= 2 to 100  25%
   #   - *= -1        5%
   # exponent:
   #   - +- 0 to 0.5 
@@ -58,8 +58,8 @@ class Individual
     
     @weights[weight_index] = case random_value_for_weight
     when 0..5     then @weights[weight_index] *= -1
-    when 6..30    then @weights[weight_index] /= rand(9)+2
-    when 31..100  then @weights[weight_index] *= rand(9)+2
+    when 6..30    then @weights[weight_index] /= rand(99)+2
+    when 31..100  then @weights[weight_index] *= rand(99)+2
     end
     @weights[weight_index] = @weights[weight_index].round
     
