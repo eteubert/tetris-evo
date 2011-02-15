@@ -9,6 +9,8 @@ BOARD_HEIGHT = 10
 POPULATION_SIZE = 5
 CHILDREN_SIZE = 5
 
+CYCLES = 10
+
 class Array
   
   def sum
@@ -83,9 +85,11 @@ class Individual
     best_board = @tetris.board
     while not best_board.lost?
       possibilities = best_board.generate_possibilities_for_both_tetrominos
+      
       # choose board with highest rating
       highest_rating = nil
       best_board = nil
+
       possibilities.each do |board|
         rating = Tetris::BoardRating.new(board)
         rating_sum = 0
@@ -97,6 +101,7 @@ class Individual
           best_board = deep_copy(board.parent)
         end
       end
+      
       break if best_board.nil?
       break if DEBUG && current_fitness > 5
       current_fitness = best_board.lines_cleared
@@ -151,7 +156,7 @@ class Main
     # print current populations fitness
     p @population.map(&:fitness)
     
-    10.times do
+    CYCLES.times do
       puts "== Iteration #{@iteration} =="
       # calculate children via mutation & recombination
       children = []
