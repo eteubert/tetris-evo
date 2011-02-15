@@ -6,8 +6,10 @@ DEBUG = false
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 10
 
-POPULATION_SIZE = 5
+POPULATION_SIZE = 10
 CHILDREN_SIZE = 5
+
+RECOMBINATION_CHANCE = 0.2
 
 CYCLES = 10
 
@@ -69,6 +71,34 @@ class Individual
     
     self
   end
+    
+  # one point crossover
+  # either weights OR exponents
+  def recombine_with(individual)
+    if rand < 0.5 # weights
+      index = rand(@weights.length)
+      if rand < 0.5 # adopt sequence before index
+        0.upto(index) do |i|
+          @weights[i] = individual.weights[i]
+        end
+      else          # adopt sequence after index
+        index.upto(weights.length) do |i|
+          @weights[i] = individual.weights[i]
+        end
+      end
+    else          # exponents
+      index = rand(@exponents.length)
+      if rand < 0.5 # adopt sequence before index
+        0.upto(index) do |i|
+          @exponents[i] = individual.exponents[i]
+        end
+      else          # adopt sequence after index
+        index.upto(weights.length) do |i|
+          @exponents[i] = individual.exponents[i]
+        end
+      end
+    end
+  end  
     
   def fitness
     
@@ -161,7 +191,11 @@ class Main
       # calculate children via mutation & recombination
       children = []
       CHILDREN_SIZE.times do
-        children << deep_copy(@population.sample).mutate
+        sample = deep_copy(@population.sample)
+        if rand < RECOMBINATION_CHANCE
+          sample.recombine_with deep_copy(@population.sample)
+        end
+        children << sample.mutate
       end
 
       # take best <POPULATION_SIZE> of parents and children
