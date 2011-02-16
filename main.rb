@@ -176,19 +176,22 @@ class Main
     @population_size = values[:population_size] || POPULATION_SIZE
     @population = []
     @iteration = 1
+    @logger = Logger.new("log/#{Time.new}.log")
   end
   
   def run
-    puts "== Random Individuals =="
+    @logger.info  "== Random Individuals =="
     
     generate_initial_population
     # sort population by fitness
     @population.sort_by!(&:fitness).reverse!
     # print current populations fitness
-    p @population.map(&:fitness)
+    @logger.info @population.map(&:fitness).inspect
     
     CYCLES.times do
+      @logger.info "== Iteration #{@iteration} =="
       puts "== Iteration #{@iteration} =="
+      
       # calculate children via mutation & recombination
       children = []
       CHILDREN_SIZE.times do
@@ -209,15 +212,16 @@ class Main
       )
       @population = selection.tournament
 
+      # logging
       best = @population.sort_by(&:fitness).reverse!.first
+      
+      @logger.info @population.map(&:fitness).inspect
       p @population.map(&:fitness)
       
-      if DEBUG
-        p "Best Individual:"
-        p "Fitness    #{best.fitness} cleared lines"
-        p "Weights    #{best.weights.to_s}"
-        p "Exponents  #{best.exponents.to_s}"
-      end
+      @logger.info "Best Individual:"
+      @logger.info "Fitness    #{best.fitness} cleared lines"
+      @logger.info "Weights    #{best.weights.to_s}"
+      @logger.info "Exponents  #{best.exponents.to_s}"
 
       @iteration += 1
     end
