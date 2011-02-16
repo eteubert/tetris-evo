@@ -211,9 +211,13 @@ class Main
 
       best = @population.sort_by(&:fitness).reverse!.first
       p @population.map(&:fitness)
-      p "Best Individual:"
-      p "Weights: #{best.weights.to_s}"
-      p "Exponents: #{best.exponents.to_s}"
+      
+      if DEBUG
+        p "Best Individual:"
+        p "Fitness    #{best.fitness} cleared lines"
+        p "Weights    #{best.weights.to_s}"
+        p "Exponents  #{best.exponents.to_s}"
+      end
 
       @iteration += 1
     end
@@ -228,8 +232,6 @@ class Main
   end
   
 end
-
-
 
 class Selection
   
