@@ -6,8 +6,8 @@ DEBUG = false
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 10
 
-POPULATION_SIZE = 8
-CHILDREN_SIZE = 16
+POPULATION_SIZE = 5
+CHILDREN_SIZE = 8
 
 RECOMBINATION_CHANCE = 0.2
 
@@ -31,6 +31,7 @@ end
 
 class Individual
   attr_reader :weights, :exponents
+  attr_accessor :fitness
   
   @weights    = []
   @exponents  = []
