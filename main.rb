@@ -4,7 +4,7 @@ RATING_SUBFUNCTIONS = 12
 DEBUG = false
 
 BOARD_WIDTH = 6
-BOARD_HEIGHT = 10
+BOARD_HEIGHT = 6
 
 POPULATION_SIZE = 5
 CHILDREN_SIZE = 8
@@ -200,8 +200,9 @@ class Main
       end
 
       # take best <POPULATION_SIZE> of parents and children
-      old_and_new = (@population + children).sort_by!(&:fitness).reverse!
-      @population = old_and_new.take(POPULATION_SIZE)
+      # old_and_new = (@population + children).sort_by!(&:fitness).reverse!
+      # @population = old_and_new.take(POPULATION_SIZE)
+      @population = Selection::elite(@population, children, POPULATION_SIZE)
       p @population.map(&:fitness)
 
       @iteration += 1
@@ -214,6 +215,14 @@ class Main
     @population_size.times do |i|
       @population << Individual::create_random
     end
+  end
+  
+end
+
+class Selection
+  
+  def self.elite(parents, children, amount)
+    (parents + children).sort_by(&:fitness).reverse!.take(amount)
   end
   
 end
