@@ -31,7 +31,7 @@ end
 
 class Individual
   attr_reader :weights, :exponents
-  attr_accessor :fitness
+  attr_accessor :fitness, :wins
   
   @weights    = []
   @exponents  = []
@@ -202,7 +202,7 @@ class Main
       # take best <POPULATION_SIZE> of parents and children
       # old_and_new = (@population + children).sort_by!(&:fitness).reverse!
       # @population = old_and_new.take(POPULATION_SIZE)
-      @population = Selection::elite(@population, children, POPULATION_SIZE)
+      @population = Selection::tournament(@population, children, POPULATION_SIZE)
       p @population.map(&:fitness)
 
       @iteration += 1
@@ -223,6 +223,26 @@ class Selection
   
   def self.elite(parents, children, amount)
     (parents + children).sort_by(&:fitness).reverse!.take(amount)
+  end
+  
+  # 3 stage tournament
+  def self.tournament(parents, children, amount)
+    population = parents + children
+    
+    population.each { |individual| individual.wins = 0 }
+    
+    population.each do |individual|
+      3.times do
+        duelist = population.sample
+        if individual.fitness > duelist.fitness
+          individual.wins += 1
+        else
+          duelist.wins += 1
+        end
+      end
+    end
+    
+    population.sort_by(&:wins).reverse!.take(amount)
   end
   
 end
