@@ -6,8 +6,8 @@ DEBUG = false
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 6
 
-POPULATION_SIZE = 5
-CHILDREN_SIZE = 8
+POPULATION_SIZE = 50
+CHILDREN_SIZE = 50
 
 RECOMBINATION_CHANCE = 0.2
 
@@ -213,10 +213,11 @@ class Main
       @population = selection.tournament
 
       # logging
-      best = @population.sort_by(&:fitness).reverse!.first
+      sorted_population = @population.sort_by(&:fitness).reverse!
+      best = sorted_population.first
       
-      @logger.info @population.map(&:fitness).inspect
-      p @population.map(&:fitness)
+      @logger.info sorted_population.map(&:fitness).inspect
+      p sorted_population.map(&:fitness)
       
       @logger.info "Best Individual:"
       @logger.info "Fitness    #{best.fitness} cleared lines"
