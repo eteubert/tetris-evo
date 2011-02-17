@@ -10,7 +10,7 @@ POPULATION_SIZE = 12
 CHILDREN_SIZE = 12
 
 RECOMBINATION_CHANCE = 0.2
-MUTATION_CHANCE = 1.0/24
+MUTATION_CHANCE = 1.0/6
 
 GENERATIONS = 100
 
@@ -110,7 +110,47 @@ class Individual
         end
       end
     end
-  end  
+  end
+  
+  # two point crossover
+  # either weights OR exponents
+  def recombine_twopoint_with(individual)
+    index = rand(@weights.length)
+    begin
+      index2 = rand(@weights.length)
+    end until(index != index2)
+    
+    index, index2 = index2, index if index > index2
+    # postcondition: index < index2
+    
+    if rand < 0.5 # weights
+      if rand < 0.5 # adopt enclosed sequence
+        index.upto(index2) do |i|
+          @weights[i] = individual.weights[i]
+        end
+      else          # adopt outer ranges
+        0.upto(index) do |i|
+          @weights[i] = individual.weights[i]
+        end        
+        index2.upto(weights.length) do |i|
+          @weights[i] = individual.weights[i]
+        end
+      end
+    else          # exponents
+      if rand < 0.5 # adopt enclosed sequence
+        index.upto(index2) do |i|
+          @exponents[i] = individual.exponents[i]
+        end
+      else          # adopt outer ranges
+        0.upto(index) do |i|
+          @exponents[i] = individual.exponents[i]
+        end
+        index2.upto(weights.length) do |i|
+          @exponents[i] = individual.exponents[i]
+        end
+      end
+    end
+  end
     
   def fitness
     
@@ -212,7 +252,7 @@ class Main
       CHILDREN_SIZE.times do
         sample = deep_copy(@population.sample)
         if rand < RECOMBINATION_CHANCE
-          sample.recombine_with deep_copy(@population.sample)
+          sample.recombine_twopoint_with deep_copy(@population.sample)
         end
         children << sample.mutate
       end
