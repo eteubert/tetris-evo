@@ -199,12 +199,14 @@ class Main
   
   def run
     @logger.info  "== Random Individuals =="
+    puts "== Random Individuals =="
     
     generate_initial_population
     # sort population by fitness
     @population.sort_by!(&:fitness).reverse!
     # print current populations fitness
     @logger.info @population.map(&:fitness).inspect
+    p @population.map(&:fitness)
     
     CYCLES.times do
       @logger.info "== Iteration #{@iteration} =="
