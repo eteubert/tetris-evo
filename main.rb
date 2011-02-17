@@ -59,18 +59,28 @@ class Individual
   # exponent:
   #   - +- 0 to 0.5 
   def mutate
-    weight_index = rand(RATING_SUBFUNCTIONS)
-    random_value_for_weight = (rand * 100).round
-    
-    @weights[weight_index] = case random_value_for_weight
-    when 0..5     then @weights[weight_index] *= -1
-    when 6..30    then @weights[weight_index] /= rand(99)+2
-    when 31..100  then @weights[weight_index] *= rand(99)+2
+    RATING_SUBFUNCTIONS.times do |weight_index|
+      if rand < MUTATION_CHANCE
+        puts "mutate weight"
+        
+        random_value_for_weight = (rand * 100).round
+        @weights[weight_index] = case random_value_for_weight
+        when 0..5     then @weights[weight_index] *= -1
+        when 6..30    then @weights[weight_index] /= rand(99)+2
+        when 31..100  then @weights[weight_index] *= rand(99)+2
+        end
+        @weights[weight_index] = @weights[weight_index].round
+        
+      end
     end
-    @weights[weight_index] = @weights[weight_index].round
     
-    exponent_index = rand(RATING_SUBFUNCTIONS)
-    @exponents[exponent_index] += rand - 0.5
+    RATING_SUBFUNCTIONS.times do |exponent_index|
+      if rand < MUTATION_CHANCE
+        puts "mutate exponent"
+        
+        @exponents[exponent_index] += rand - 0.5
+      end
+    end
     
     # uncache fitness
     @fitness = nil
@@ -81,6 +91,7 @@ class Individual
   # one point crossover
   # either weights OR exponents
   def recombine_with(individual)
+    puts "recombine"
     if rand < 0.5 # weights
       index = rand(@weights.length)
       if rand < 0.5 # adopt sequence before index
