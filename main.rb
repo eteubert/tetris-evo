@@ -6,10 +6,11 @@ DEBUG = false
 BOARD_WIDTH = 6
 BOARD_HEIGHT = 6
 
-POPULATION_SIZE = 50
-CHILDREN_SIZE = 50
+POPULATION_SIZE = 20
+CHILDREN_SIZE = 20
 
 RECOMBINATION_CHANCE = 0.2
+MUTATION_CHANCE = 1.0/24
 
 CYCLES = 10
 
@@ -17,6 +18,10 @@ class Array
   
   def sum
     self.compact.inject(0) {|sum, i| sum += i}
+  end
+  
+  def avg
+    (self.sum / self.count.to_f).round(2)
   end
   
   def rand_index
@@ -106,42 +111,44 @@ class Individual
     # cache fitness
     return @fitness unless @fitness.nil?
     
-    # puts "Calc fitness for #{self.ihash}"
+    fitnesses = []
     
     # or recalculate it
-    @tetris = Tetris::Game.new(
-      Tetris::Dimensions.new(:width => BOARD_WIDTH, :height => BOARD_HEIGHT)
-    )
-    current_fitness = 0
-    best_board = @tetris.board
-    while not best_board.lost?
-      possibilities = best_board.generate_possibilities_for_both_tetrominos
-      
-      # choose board with highest rating
-      highest_rating = nil
-      best_board = nil
+    2.times do
+      @tetris = Tetris::Game.new(
+        Tetris::Dimensions.new(:width => BOARD_WIDTH, :height => BOARD_HEIGHT)
+      )
+      current_fitness = 0
+      best_board = @tetris.board
+      while not best_board.lost?
+        possibilities = best_board.generate_possibilities_for_both_tetrominos
 
-      possibilities.each do |board|
-        rating = Tetris::BoardRating.new(board)
-        rating_sum = 0
-        RATING_SUBFUNCTIONS.times do |i|
-          rating_sum += @weights[i] * rating.send(Tetris::BoardRating::RATING_NAMES[i]) ** @exponents[i]
+        # choose board with highest rating
+        highest_rating = nil
+        best_board = nil
+
+        possibilities.each do |board|
+          rating = Tetris::BoardRating.new(board)
+          rating_sum = 0
+          RATING_SUBFUNCTIONS.times do |i|
+            rating_sum += @weights[i] * rating.send(Tetris::BoardRating::RATING_NAMES[i]) ** @exponents[i]
+          end
+          if highest_rating == nil || rating_sum > highest_rating
+            highest_rating = rating_sum
+            best_board = deep_copy(board.parent)
+          end
         end
-        if highest_rating == nil || rating_sum > highest_rating
-          highest_rating = rating_sum
-          best_board = deep_copy(board.parent)
-        end
+
+        break if best_board.nil?
+        break if DEBUG && current_fitness > 5
+        fitnesses << best_board.lines_cleared
+        # puts "======"
+        # best_board.display
+        # puts best_board.lines_cleared
       end
-      
-      break if best_board.nil?
-      break if DEBUG && current_fitness > 5
-      current_fitness = best_board.lines_cleared
-      # puts "======"
-      # best_board.display
-      # puts best_board.lines_cleared
     end
     
-    @fitness = current_fitness
+    @fitness = fitnesses.avg
     
     return @fitness
   end
