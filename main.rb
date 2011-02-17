@@ -12,7 +12,7 @@ CHILDREN_SIZE = 20
 RECOMBINATION_CHANCE = 0.2
 MUTATION_CHANCE = 1.0/24
 
-CYCLES = 10
+GENERATIONS = 100
 
 class Array
   
@@ -203,7 +203,7 @@ class Main
     @logger.info @population.map(&:fitness).inspect
     p @population.map(&:fitness)
     
-    CYCLES.times do
+    GENERATIONS.times do
       @logger.info "== Iteration #{@iteration} =="
       puts "== Iteration #{@iteration} =="
       
