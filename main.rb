@@ -61,8 +61,6 @@ class Individual
   def mutate
     RATING_SUBFUNCTIONS.times do |weight_index|
       if rand < MUTATION_CHANCE
-        puts "mutate weight"
-        
         random_value_for_weight = (rand * 100).round
         @weights[weight_index] = case random_value_for_weight
         when 0..5     then @weights[weight_index] *= -1
@@ -76,8 +74,6 @@ class Individual
     
     RATING_SUBFUNCTIONS.times do |exponent_index|
       if rand < MUTATION_CHANCE
-        puts "mutate exponent"
-        
         @exponents[exponent_index] += rand - 0.5
       end
     end
@@ -91,7 +87,6 @@ class Individual
   # one point crossover
   # either weights OR exponents
   def recombine_with(individual)
-    puts "recombine"
     if rand < 0.5 # weights
       index = rand(@weights.length)
       if rand < 0.5 # adopt sequence before index
