@@ -252,7 +252,7 @@ class Main
       CHILDREN_SIZE.times do
         sample = deep_copy(@population.sample)
         if rand < RECOMBINATION_CHANCE
-          sample.recombine_twopoint_with deep_copy(@population.sample)
+          sample.recombine_with deep_copy(@population.sample)
         end
         children << sample.mutate
       end
