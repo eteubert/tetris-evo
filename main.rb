@@ -1,5 +1,7 @@
 require 'tetris-api'
 
+require './initializers'
+
 RATING_SUBFUNCTIONS = 12
 DEBUG = false
 
@@ -13,26 +15,6 @@ RECOMBINATION_CHANCE = 0.2
 MUTATION_CHANCE = 1.0/6
 
 GENERATIONS = 100
-
-class Array
-  
-  def sum
-    self.compact.inject(0) {|sum, i| sum += i}
-  end
-  
-  def avg
-    (self.sum / self.count.to_f).round(2)
-  end
-  
-  def rand_index
-    rand(self.length)
-  end
-  
-  def sample
-    self[rand_index]
-  end
-  
-end
 
 class Individual
   attr_reader :weights, :exponents
